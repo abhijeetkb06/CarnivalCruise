@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83c76171-9e75-4526-96b4-e641db141dc6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/CruiseSearch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CruiseSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CruiseSearch.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +71,7 @@
       <workItem from="1672959192402" duration="1046000" />
       <workItem from="1672960343809" duration="22829000" />
       <workItem from="1673312125586" duration="19376000" />
-      <workItem from="1673460200248" duration="10860000" />
+      <workItem from="1673460200248" duration="15390000" />
     </task>
     <servers />
   </component>
@@ -97,22 +94,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/CruiseSearch.java</url>
-          <line>146</line>
+          <line>155</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/CruiseSearch.java</url>
-          <line>77</line>
+          <line>86</line>
           <option name="timeStamp" value="21" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/CruiseSearch.java</url>
-          <line>79</line>
+          <line>88</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/CruiseSearch.java</url>
-          <line>71</line>
+          <line>81</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
