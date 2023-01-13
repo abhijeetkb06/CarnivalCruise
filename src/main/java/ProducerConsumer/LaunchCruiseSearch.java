@@ -20,17 +20,18 @@ public class LaunchCruiseSearch {
 		// Create number of producer threads
 		Thread[] producer = new Thread[10];
 		Arrays.stream(producer).forEach(p -> {
-			p = new Thread(new Producer(sharedKeysQueue,offset.addAndGet(1000)));
+			offset.addAndGet(200);
+			p = new Thread(new Producer(sharedKeysQueue,offset));
 			p.setName("PRODUCER THREAD " + p);
 			p.start();
         });
 
-		/*// Create number of consumer threads
-		Thread[] consumer = new Thread[4];// amount of threads
+		// Create number of consumer threads
+		Thread[] consumer = new Thread[10];// amount of threads
 		Arrays.stream(consumer).forEach(c -> {
 			c = new Thread(new Consumer(sharedKeysQueue));
 			c.setName("CONSUMER THREAD " + c);
 			c.start();
-        });*/
+        });
 	}
 }

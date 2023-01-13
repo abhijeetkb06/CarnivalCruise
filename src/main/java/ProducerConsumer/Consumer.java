@@ -13,6 +13,7 @@ public class Consumer extends Thread {
 
 	// Read data to consume once data is loaded in queue
 	private BlockingQueue<String> keysQueue;
+	private static final Cluster cluster = CouchbaseConfiguration.getInstance().getCluster();
 
 	public Consumer(BlockingQueue<String> keysQueue) {
 		super("KEYS CONSUMER");
@@ -28,11 +29,13 @@ public class Consumer extends Thread {
 
 				// Remove the key from shared key queue and process
 				String key = keysQueue.take();
+				bulkReadCBCCatalogUseKeys(cluster,key);
 
 				if (keysQueue.size() < 1 && !firstRun) {
 					System.out.println("***********TERMINATE*************QUEUE SIZE************** "+ keysQueue.size());
 					// Stop thread execution once the queue is exhausted
-					Thread.currentThread().interrupt();
+//					Thread.currentThread().interrupt();
+					break;
 				}
 				firstRun=false;
 			}
@@ -41,10 +44,8 @@ public class Consumer extends Thread {
 		}
 	}
 
-	private static void bulkReadCBCCatalogUseKeys(Cluster cluster, List<String> docsToFetch) {
+	private static void bulkReadCBCCatalogUseKeys(Cluster cluster, String commaSeparatedKeys) {
 		try {
-
-			String commaSeparatedKeys = String.join("\",\"", docsToFetch);
 
 			// Query to get documents based on the IDs constructed/fetched above
 			var queryToFetchDoc = "SELECT *\n" +

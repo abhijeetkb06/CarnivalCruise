@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83c76171-9e75-4526-96b4-e641db141dc6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Consumer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/LaunchCruiseSearch.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Producer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CruiseSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CruiseSearch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Consumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Consumer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/LaunchCruiseSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/LaunchCruiseSearch.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Producer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Producer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +44,8 @@
     "last_opened_file_path": "/Users/abhijeetbehera/Documents/Git/CarnivalCruise/src/main/java/ProducerConsumer",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "Console"
   }
 }]]></component>
   <component name="ReactorSettings">
@@ -108,7 +106,7 @@
       <workItem from="1673312125586" duration="19376000" />
       <workItem from="1673460200248" duration="21619000" />
       <workItem from="1673537892838" duration="5348000" />
-      <workItem from="1673578393246" duration="9417000" />
+      <workItem from="1673578393246" duration="12420000" />
     </task>
     <servers />
   </component>
@@ -148,6 +146,11 @@
           <url>file://$PROJECT_DIR$/src/main/java/CruiseSearch.java</url>
           <line>77</line>
           <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java</url>
+          <line>38</line>
+          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

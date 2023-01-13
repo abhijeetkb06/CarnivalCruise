@@ -22,7 +22,7 @@ public class CouchbaseConfiguration {
 	static Bucket bucket = null;
 	static Scope scope = null;
 	static Collection collection = null;
-	private static final CouchbaseConfiguration couchbaseInstance = null;
+	private static final CouchbaseConfiguration couchbaseInstance = new CouchbaseConfiguration();
 
     private CouchbaseConfiguration() {
 		// Custom environment connection.
@@ -36,9 +36,6 @@ public class CouchbaseConfiguration {
 	}
 
     public static CouchbaseConfiguration getInstance() {
-        if (couchbaseInstance == null) {
-			return new CouchbaseConfiguration();
-		}
 		return couchbaseInstance;
     }
     
