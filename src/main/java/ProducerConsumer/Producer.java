@@ -30,7 +30,7 @@ public class Producer extends Thread {
         while (offset.get() < 11050) {
             System.out.println("********* OFFSET **********" + offset);
             var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' OFFSET " + offset + " LIMIT 1000";
-            offset.addAndGet(200);
+            offset.addAndGet(100);
             QueryResult result = cluster.query(query,
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(true));
             System.out.println("Retrieving Keys TIME in ms: " + result.metaData().metrics().get().executionTime().toMillis());

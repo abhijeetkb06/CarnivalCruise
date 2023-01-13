@@ -7,7 +7,6 @@
     <list default="true" id="83c76171-9e75-4526-96b4-e641db141dc6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Consumer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Consumer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/CouchbaseConfiguration.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/LaunchCruiseSearch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/LaunchCruiseSearch.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Producer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ProducerConsumer/Producer.java" afterDir="false" />
     </list>
@@ -106,7 +105,7 @@
       <workItem from="1673312125586" duration="19376000" />
       <workItem from="1673460200248" duration="21619000" />
       <workItem from="1673537892838" duration="5348000" />
-      <workItem from="1673578393246" duration="12420000" />
+      <workItem from="1673578393246" duration="12689000" />
     </task>
     <servers />
   </component>

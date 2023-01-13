@@ -20,7 +20,7 @@ public class LaunchCruiseSearch {
 		// Create number of producer threads
 		Thread[] producer = new Thread[10];
 		Arrays.stream(producer).forEach(p -> {
-			offset.addAndGet(200);
+			offset.addAndGet(100);
 			p = new Thread(new Producer(sharedKeysQueue,offset));
 			p.setName("PRODUCER THREAD " + p);
 			p.start();
