@@ -1,5 +1,6 @@
 import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.core.error.DocumentNotFoundException;
+
 import com.couchbase.client.java.*;
 import com.couchbase.client.java.codec.RawStringTranscoder;
 import com.couchbase.client.java.kv.GetOptions;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 import static com.couchbase.client.java.query.QueryOptions.queryOptions;
@@ -33,28 +35,21 @@ public class CruiseSearch {
         Scope scope = bucket.scope("CruiseSearch");
         Collection collection = scope.collection("cbcatalog");
 
-        bulkReadCatalogUseCCLQuery(cluster);
+//        bulkReadCatalogUseCCLQuery(cluster);
 
 //        bulkReadCatalogUseCCLReactiveQuery(cluster);
 
 //        bulkReadCBCatalogReactive(cluster, bucket, scope, collection);
 
-//        bulkReadCBCCatalogUseKeys(cluster, bucket, scope, collection);
+        bulkReadCBCCatalogUseKeys(cluster);
 
     }
 
-
-
-    private static void bulkReadCBCCatalogUseKeys(Cluster cluster, Bucket bucket, Scope scope, Collection collection) {
+    private static void bulkReadCBCCatalogUseKeys(Cluster cluster) {
         try {
 
-            ReactiveCluster reactiveCluster = cluster.reactive();
-            ReactiveBucket reactiveBucket = bucket.reactive();
-            ReactiveScope reactiveScope = scope.reactive();
-            ReactiveCollection reactiveCollection = collection.reactive();
-
             // Query to get random keys based on limit set
-            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 5000";
+            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 500";
 
             QueryResult result = cluster.query(query,
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(false));
@@ -75,12 +70,13 @@ public class CruiseSearch {
             // Capture time before query execution
             long startTime = System.currentTimeMillis();
 
+            // Fetch all documents based on key
             QueryResult resultSetToFilter = cluster.query(queryToFetchDoc,
                     queryOptions().metrics(true));
 
             long networkLatency = System.currentTimeMillis() - startTime;
-            System.out.println("Total TIME including Network latency in ms: " + networkLatency);
-            System.out.println("Total Network latency TIME in ms: " + (networkLatency - resultSetToFilter.metaData().metrics().get().executionTime().toMillis()));
+           /* System.out.println("Total TIME including Network latency in ms: " + networkLatency);
+            System.out.println("Total Network latency TIME in ms: " + (networkLatency - resultSetToFilter.metaData().metrics().get().executionTime().toMillis()));*/
             System.out.println("Retrieving Docs TIME in ms: " + resultSetToFilter.metaData().metrics().get().executionTime().toMillis());
             System.out.println("Total Docs: " + resultSetToFilter.metaData().metrics().get().resultCount());
 
@@ -102,14 +98,14 @@ public class CruiseSearch {
             ReactiveScope reactiveScope = scope.reactive();
             ReactiveCollection reactiveCollection = collection.reactive();
 
-            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 5000";
+            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 11000";
 
             QueryResult result = cluster.query(query,
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(false));
             List<String> docsToFetch = result.rowsAsObject().stream().map(s -> s.getString("id")).collect(Collectors.toList());
 
             long startTime = System.currentTimeMillis();
-            System.out.println("START TIME: " + startTime);
+
             List<GetResult> results = Flux.fromIterable(docsToFetch)
                     .flatMap(key -> reactiveCollection.get(key, GetOptions.getOptions().transcoder(RawStringTranscoder.INSTANCE)).onErrorResume(e -> Mono.empty())).collectList().block();
 
@@ -120,6 +116,40 @@ public class CruiseSearch {
 
             String returned = results.get(0).contentAs(String.class);
             System.out.println("Done" + returned);
+        } catch (DocumentNotFoundException ex) {
+            System.out.println("Document not found!");
+        }
+    }
+
+    private static void bulkReadCBCatalogAsync(Cluster cluster, Bucket bucket, Scope scope, Collection collection) {
+        try {
+
+            AsyncCluster asyncCluster = cluster.async();
+            AsyncBucket asyncBucket = bucket.async();
+            AsyncScope asyncScope = scope.async();
+            AsyncCollection asyncCollection = collection.async();
+
+            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 11000";
+
+            QueryResult result = cluster.query(query,
+                    queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(false));
+            List<String> docsToFetch = result.rowsAsObject().stream().map(s -> s.getString("id")).collect(Collectors.toList());
+
+            long startTime = System.currentTimeMillis();
+            System.out.println("START TIME: " + startTime);
+
+           /* Flowable.fromFuture(asyncCollection
+                            .get(key, GetOptions.getOptions().withExpiry(true).retryStrategy(FailFastRetryStrategy.INSTANCE)))
+                    .map(getResult -> new JsonDocument(key, getResult.contentAsObject(), getResult.cas(), getResult.expiry().get()))
+                    .switchIfEmpty(Flowable.error(new NoSuchElementException(key + " Not Found")));
+
+            long networkLatency = System.currentTimeMillis() - startTime;
+            System.out.println("Total TIME including Network latency in ms: " + networkLatency);
+
+            System.out.println("Total Docs: " + results.size());
+
+            String returned = results.get(0).contentAs(String.class);
+            System.out.println("Done" + returned);*/
         } catch (DocumentNotFoundException ex) {
             System.out.println("Document not found!");
         }
@@ -146,8 +176,8 @@ public class CruiseSearch {
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(true));
 
             long networkLatency = System.currentTimeMillis() - startTime;
-            System.out.println("Total TIME including Network latency in ms: " + networkLatency);
-            System.out.println("Total Network latency TIME in ms: " + (networkLatency - result.metaData().metrics().get().executionTime().toMillis()));
+         /*   System.out.println("Total TIME including Network latency in ms: " + networkLatency);
+            System.out.println("Total Network latency TIME in ms: " + (networkLatency - result.metaData().metrics().get().executionTime().toMillis()));*/
             System.out.println("Retrieving Keys TIME in ms: " + result.metaData().metrics().get().executionTime().toMillis());
             System.out.println("Total Docs: " + result.metaData().metrics().get().resultCount());
 /*            System.out.println("***Query Executed***" );
