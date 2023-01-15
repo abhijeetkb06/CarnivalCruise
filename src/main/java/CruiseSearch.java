@@ -41,7 +41,7 @@ public class CruiseSearch {
 
 //        bulkReadCBCatalogReactive(cluster, bucket, scope, collection);
 
-        bulkReadCBCCatalogUseKeys(cluster);
+//        bulkReadCBCCatalogUseKeys(cluster);
 
     }
 
@@ -49,7 +49,7 @@ public class CruiseSearch {
         try {
 
             // Query to get random keys based on limit set
-            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 500";
+            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 11022";
 
             QueryResult result = cluster.query(query,
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(false));
@@ -98,7 +98,7 @@ public class CruiseSearch {
             ReactiveScope reactiveScope = scope.reactive();
             ReactiveCollection reactiveCollection = collection.reactive();
 
-            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 11000";
+            var query = "SELECT meta(c).id FROM `CruiseSearch-magma`.`CruiseSearch`.cbcatalog c WHERE meta(c).id like '%0%' limit 95";
 
             QueryResult result = cluster.query(query,
                     queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(false));
@@ -121,6 +121,7 @@ public class CruiseSearch {
         }
     }
 
+    //TODO
     private static void bulkReadCBCatalogAsync(Cluster cluster, Bucket bucket, Scope scope, Collection collection) {
         try {
 

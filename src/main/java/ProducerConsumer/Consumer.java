@@ -21,7 +21,8 @@ public class Consumer extends Thread {
 
     public void run() {
         try {
-
+            // Capture time before query execution
+            long startTime = System.currentTimeMillis();
             while (true) {
 
                 System.out.println("***************QUEUE SIZE************** " + keysQueue.size());
@@ -36,6 +37,9 @@ public class Consumer extends Thread {
                     break;
                 }
             }
+            long totalTime = System.currentTimeMillis() - startTime;
+            System.out.println("&&&&&&&&&&&&&&&& ------------- CONSUMER THREAD EXECUTION COMPLETE ------------- &&&&&&&&&&&&&&&&&"+ Thread.currentThread().getName()
+                    + "TIME TAKEN: " +totalTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -63,7 +67,7 @@ public class Consumer extends Thread {
             long networkLatency = System.currentTimeMillis() - startTime;
            /* System.out.println("Total TIME including Network latency in ms: " + networkLatency);
             System.out.println("Total Network latency TIME in ms: " + (networkLatency - resultSetToFilter.metaData().metrics().get().executionTime().toMillis()));*/
-            System.out.println("Retrieving Docs TIME in ms: " + resultSetToFilter.metaData().metrics().get().executionTime().toMillis());
+            System.out.println("CONSUMER Retrieving Docs TIME in ms: " + resultSetToFilter.metaData().metrics().get().executionTime().toMillis());
             System.out.println("Total Docs: " + resultSetToFilter.metaData().metrics().get().resultCount());
 
             System.out.println("Process completed" + resultSetToFilter.rowsAsObject().get(0));
