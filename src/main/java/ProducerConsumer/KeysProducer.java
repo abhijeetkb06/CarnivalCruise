@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static com.couchbase.client.java.query.QueryOptions.queryOptions;
 
-public class Producer extends Thread {
+public class KeysProducer extends Thread {
 
     // Load data in queue
     private BlockingQueue<String> keysQueue;
@@ -19,8 +19,8 @@ public class Producer extends Thread {
 
     private static final Cluster cluster = CouchbaseConfiguration.getInstance().getCluster();
 
-    public Producer(BlockingQueue<String> keysQueue, AtomicInteger offset) {
-        super("PRODUCER");
+    public KeysProducer(BlockingQueue<String> keysQueue, AtomicInteger offset) {
+        super("KEYS PRODUCER THREAD");
         this.keysQueue = keysQueue;
         this.offset = offset;
     }
