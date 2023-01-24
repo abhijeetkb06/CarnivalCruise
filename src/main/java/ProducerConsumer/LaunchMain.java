@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * @author abhijeetbehera
  */
-public class LaunchCruiseSearch {
+public class LaunchMain {
 
 	public static void main(String[] args) {
 

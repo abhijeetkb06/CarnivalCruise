@@ -1,52 +1,44 @@
+import com.couchbase.client.core.env.CoreEnvironment;
+import com.couchbase.client.core.env.ThresholdLoggingTracerConfig;
 import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.core.error.DocumentNotFoundException;
-
 import com.couchbase.client.java.*;
 import com.couchbase.client.java.codec.RawStringTranscoder;
-
 import com.couchbase.client.java.env.ClusterEnvironment;
 import com.couchbase.client.java.kv.GetOptions;
 import com.couchbase.client.java.kv.GetResult;
 import com.couchbase.client.java.query.QueryResult;
 import com.couchbase.client.java.query.QueryScanConsistency;
 import com.couchbase.client.java.query.ReactiveQueryResult;
-import com.couchbase.client.tracing.opentelemetry.OpenTelemetryRequestSpan;
 import com.couchbase.client.tracing.opentelemetry.OpenTelemetryRequestTracer;
-import com.couchbase.client.tracing.opentracing.OpenTracingRequestTracer;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.opentelemetry.api.OpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
-import io.opentelemetry.context.Context;
-import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.context.propagation.TextMapPropagator;
-import io.opentelemetry.exporter.jaeger.JaegerGrpcSpanExporter;
+
 import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
-
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+
 import java.time.Duration;
 import java.util.List;
-
-import java.util.concurrent.TimeUnit;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.couchbase.client.java.query.QueryOptions.queryOptions;
 
-public class CruiseSearch {
-    private static final String OTEL_COLLECTOR_ENDPOINT = "http://127.0.0.1:4317";
+public class TracingCruiseSearch {
+
+    private static final String OTEL_COLLECTOR_ENDPOINT = "http://localhost:14250";
     static String connectionString = "couchbases://cb.n-nrhqi-iwnoilok.cloud.couchbase.com";
     static String username = "Abhijeet";
     static String password = "Password@P1";
@@ -54,17 +46,13 @@ public class CruiseSearch {
 
     public static void main(String[] args) {
 
-        Cluster cluster = getJaegerTrace();
+        enableLogging();
 
- /*       OpenTelemetry openTelemetry = getOpenTelemetryCouchbaseMethod();
-        Cluster cluster = Cluster.connect(connectionString, ClusterOptions.clusterOptions(username, password)
-                .environment(env -> {
-                    // Provide the OpenTelemetry object to the Couchbase SDK
-                    env.requestTracer(OpenTelemetryRequestTracer.wrap(openTelemetry));
-                }));*/
+//        Cluster cluster = getJaegerTrace();
+//        getPrometheusTrace();
 
         // Custom environment connection.
-//        Cluster cluster = Cluster.connect(connectionString, username, password);
+        Cluster cluster = Cluster.connect(connectionString, username, password);
 
         // Get a bucket reference
         Bucket bucket = cluster.bucket(bucketName);
@@ -82,15 +70,37 @@ public class CruiseSearch {
 
     }
 
+    private static void enableLogging() {
+        Logger logger = Logger.getLogger("com.couchbase.client");
+        logger.setLevel(Level.FINEST);
+        for(Handler h : logger.getParent().getHandlers()) {
+            if(h instanceof ConsoleHandler){
+                h.setLevel(Level.FINEST);
+            }
+        }
+
+    }
+
+/*    private static void getPrometheusTrace() {
+
+        // Build the OpenTelemetry Meter
+        MeterSdkProvider meterSdkProvider = OpenTelemetrySdk.getGlobalMeterProvider();
+        Meter meter = meterSdkProvider.get("OpenTelemetryMetricsSample");
+
+       // Start the Prometheus HTTP Server
+        try {
+            HTTPServer server = server = new HTTPServer(19090);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Register the Prometheus Collector
+        PrometheusCollector.builder().setMetricProducer(meterSdkProvider.getMetricProducer()).buildAndRegister();
+    }*/
+
     private static Cluster getJaegerTrace() {
 
-//        OpenTelemetry openTelemetry = getOpenTelemetryCouchbaseMethod();
-        OpenTelemetry openTelemetry = initOpenTelemetry();
-
-        Tracer tracer = getTracer(openTelemetry);
-        setSpan(tracer, openTelemetry);
-
-
+        OpenTelemetry openTelemetry = openTelemetryDirect();
         Cluster cluster = Cluster.connect(connectionString, ClusterOptions.clusterOptions(username, password)
                 .environment(env -> {
                     // Provide the OpenTelemetry object to the Couchbase SDK
@@ -100,147 +110,27 @@ public class CruiseSearch {
         return cluster;
     }
 
-    private static void setSpan(Tracer tracer, OpenTelemetry openTelemetry) {
-        //        Span parentSpan = tracer.spanBuilder("/").setSpanKind(SpanKind.CLIENT).startSpan();
-        /*an automated way to propagate the parent span on the current thread*/
-        for (int index = 0; index < 3; index++) {
-            /*create a span by specifying the name of the span. The start and end time of the span is automatically set by the OpenTelemetry SDK*/
-            Span parentSpan = tracer.spanBuilder("parentSpan").setNoParent().startSpan();
-            System.out.println("In parent method. TraceID : {}"+ parentSpan.getSpanContext().getTraceId());
+    public static OpenTelemetry openTelemetryDirect() {
 
-            /*put the span into the current Context*/
-            try (io.opentelemetry.context.Scope scope = parentSpan.makeCurrent()) {
-
-                /*annotate the span with attributes specific to the represented operation, to provide additional context*/
-                parentSpan.setAttribute("parentIndex", index);
-                childMethod(parentSpan,openTelemetry);
-            } catch (Throwable throwable) {
-                parentSpan.setStatus(StatusCode.ERROR, "Something wrong with the parent span");
-            } finally {
-                /*closing the scope does not end the span, this has to be done manually*/
-                parentSpan.end();
-            }
-        }
-
-        /*sleep for a bit to let everything settle*/
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Tracer getTracer(OpenTelemetry openTelemetry) {
-        Tracer tracer = openTelemetry.getTracer("io.opentelemetry.example.OtelExample");
-//        Tracer tracer = openTelemetry.getTracerProvider().get("opentel-example", "1.0");
-        return tracer;
-    }
-
-    private static void childMethod(Span parentSpan,OpenTelemetry openTelemetry) {
-
-        Tracer tracer = getTracer(openTelemetry);
-
-        /*setParent(...) is not required, `Span.current()` is automatically added as the parent*/
-        Span childSpan = tracer.spanBuilder("childSpan").setParent(Context.current().with(parentSpan))
-                .startSpan();
-        System.out.println("In child method. TraceID : {}"+ childSpan.getSpanContext().getTraceId());
-
-        /*put the span into the current Context*/
-        try (io.opentelemetry.context.Scope scope = childSpan.makeCurrent()) {
-            Thread.sleep(1000);
-        } catch (Throwable throwable) {
-            childSpan.setStatus(StatusCode.ERROR, "Something wrong with the child span");
-        } finally {
-            childSpan.end();
-        }
-    }
-
-    private static OpenTelemetry getOpenTelemetryCouchbaseMethod() {
-        String SERVICE_NAME = "jaeger-service";
-//http://localhost:16686  http://localhost:14250
         // Set the OpenTelemetry SDK's SdkTracerProvider
         SdkTracerProvider sdkTracerProvider = SdkTracerProvider.builder()
                 .setResource(Resource.getDefault()
                         .merge(Resource.builder()
-                                // An OpenTelemetry service name generally reflects the name of your microservice,
+                                // An OpenTelemetry service name generally reflects the name of your app,
                                 // e.g. "shopping-cart-service"
-                                .put("service.name", SERVICE_NAME)
+                                .put("service.name", "CCL_METRICS")
                                 .build()))
                 .addSpanProcessor(BatchSpanProcessor.builder(OtlpHttpSpanExporter.builder()
-                        .setEndpoint("http://127.0.0.1:16686")
+                        .setEndpoint(OTEL_COLLECTOR_ENDPOINT)
                         .build()).build())
                 .setSampler(Sampler.alwaysOn())
                 .build();
-
-//        BatchSpanProcessor.builder(OtlpHttpSpanExporter.getDefault()).setScheduleDelay(java.time.Duration.ofMillis(100));
 
         // Set the OpenTelemetry SDK's OpenTelemetry
         OpenTelemetry openTelemetry = OpenTelemetrySdk.builder()
                 .setTracerProvider(sdkTracerProvider)
                 .buildAndRegisterGlobal();
         return openTelemetry;
-    }
-
-    static OpenTelemetry initOpenTelemetry() {
-   String SERVICE_NAME = "carnival-service";
-
-             OtlpHttpSpanExporter spanExporter = getOtlpHttpSpanExporter();
-        BatchSpanProcessor spanProcessor = getBatchSpanProcessor(spanExporter);
-        Resource serviceNameResource = Resource.getDefault()
-                .merge(Resource.builder()
-                        // An OpenTelemetry service name generally reflects the name of your microservice,
-                        // e.g. "shopping-cart-service"
-                        .put("service.name", SERVICE_NAME)
-                        .build());
-        SdkTracerProvider tracerProvider = getSdkTracerProvider(spanProcessor, serviceNameResource);
-        OpenTelemetrySdk openTelemetrySdk = getOpenTelemetrySdk(tracerProvider);
-//        Runtime.getRuntime().addShutdownHook(new Thread(tracerProvider::shutdown));
-
-     /*   Resource serviceNameResource = Resource.builder()
-                .put("service.name", SERVICE_NAME)
-                .build();
-        ManagedChannel jaegerChannel = ManagedChannelBuilder
-                .forAddress("localhost", 4317)
-                .usePlaintext()
-                .build();
-        JaegerGrpcSpanExporter jaegerExporter =    JaegerGrpcSpanExporter.builder().setChannel(jaegerChannel).build();
-
-        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
-                .setResource(Resource.getDefault().merge(serviceNameResource))
-                .build();
-
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder()
-                .setTracerProvider(tracerProvider)
-                .build();
-*/
-        return openTelemetrySdk;
-    }
-
-    private static OpenTelemetrySdk getOpenTelemetrySdk(SdkTracerProvider tracerProvider) {
-        OpenTelemetrySdk openTelemetrySdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider)
-                .buildAndRegisterGlobal();
-        return openTelemetrySdk;
-    }
-
-    private static SdkTracerProvider getSdkTracerProvider(BatchSpanProcessor spanProcessor, Resource serviceNameResource) {
-        SdkTracerProvider tracerProvider = SdkTracerProvider.builder().addSpanProcessor(spanProcessor)
-                .setResource(Resource.getDefault().merge(serviceNameResource)).build();
-        return tracerProvider;
-    }
-
-    private static BatchSpanProcessor getBatchSpanProcessor(OtlpHttpSpanExporter spanExporter) {
-        BatchSpanProcessor spanProcessor = BatchSpanProcessor.builder(spanExporter)
-                .setScheduleDelay(100, TimeUnit.MILLISECONDS).build();
-        return spanProcessor;
-    }
-
-    private static OtlpHttpSpanExporter getOtlpHttpSpanExporter() {
-        OtlpHttpSpanExporter spanExporter = OtlpHttpSpanExporter.builder()
-                .setEndpoint(OTEL_COLLECTOR_ENDPOINT)
-                .setTimeout(2, TimeUnit.SECONDS)
-                .build();
-        return spanExporter;
     }
 
     private static void bulkReadCBCCatalogUseKeys(Cluster cluster) {
@@ -318,11 +208,11 @@ public class CruiseSearch {
             System.out.println("In parent method. TraceID : {}"+ parentSpan.getSpanContext().getTraceId());*/
 
             // Perform bulk read by controlling number of threads in parallel function
-            List<GetResult>  results =  Flux.fromIterable(docsToFetch)
+            List<GetResult> results = Flux.fromIterable(docsToFetch)
                     .parallel(10)
                     .runOn(Schedulers.boundedElastic())
-                    .flatMap(key -> reactiveCollection.get(key,GetOptions.getOptions().transcoder(RawStringTranscoder.INSTANCE))
-                    .onErrorResume(e -> Mono.empty()))
+                    .flatMap(key -> reactiveCollection.get(key, GetOptions.getOptions().transcoder(RawStringTranscoder.INSTANCE))
+                            .onErrorResume(e -> Mono.empty()))
                     .sequential()
                     .collectList()
                     .block();
@@ -395,9 +285,9 @@ public class CruiseSearch {
                             "         t.META_CODE;";
 
             Mono<ReactiveQueryResult> result = reactiveCluster.query(query,
-                    queryOptions().adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(true));
+                    queryOptions().pipelineBatch(10).adhoc(false).maxParallelism(4).scanConsistency(QueryScanConsistency.NOT_BOUNDED).metrics(true));
 
-            System.out.println("Retrieving Keys TIME in ms: " +   result.metrics().block().metaData().metrics().block().metrics().get().executionTime().toMillis());
+            System.out.println("Retrieving Keys TIME in ms: " + result.metrics().block().metaData().metrics().block().metrics().get().executionTime().toMillis());
             System.out.println("Total Docs: " + result.metrics().block().metaData().metrics().block().metrics().get().resultCount());
 
 //            result.flatMapMany(ReactiveQueryResult::rowsAsObject).subscribe(row -> System.out.println("Found row: " + row.size()));
